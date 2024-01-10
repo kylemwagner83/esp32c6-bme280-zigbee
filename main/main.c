@@ -19,17 +19,35 @@
 
 
 // float temp = 0, pres = 0, hum = 0;
-// struct bmeValsStruct bmeVals;
+
 
 RTC_NOINIT_ATTR uint8_t loopCount;
-RTC_NOINIT_ATTR struct bmeValsStruct bmeVals;
+RTC_NOINIT_ATTR struct bmeValsStruct bmeValsRTCmem;
+struct bmeValsStruct bmeVals;
 
 
 
 static void esp_deep_sleep_countdown(void *params)
 {
     vTaskDelay((30 * 1000) / portTICK_PERIOD_MS); // Delay time in milliseconds (seconds * 1000)
-    printf("Timed out - Entering deep sleep\n");
+    printf("App timed out - Entering deep sleep\n");
+    esp_deep_sleep_start();
+}
+
+static void update_attributes()
+{
+    /* Start Zigbee */
+    ESP_ERROR_CHECK(zb_start());
+
+    /* Wait for Zigbee connection */
+    vTaskDelay((10 * 1000) / portTICK_PERIOD_MS); // Delay time in milliseconds (seconds * 1000)
+    ESP_LOGI(TAG, "10 seconds after zb_start");
+
+    bmeValsRTCmem.convertedTemp = bmeVals.convertedTemp;
+    ESP_ERROR_CHECK(zb_update_temperature(bmeVals.convertedTemp));
+
+    vTaskDelay((1 * 1000) / portTICK_PERIOD_MS); // Delay time in milliseconds (seconds * 1000)
+    printf("Attributes updated - Entering deep sleep\n");
     esp_deep_sleep_start();
 }
 
@@ -46,24 +64,24 @@ void app_main(void)
     get_bme_vals();
 
 
+    ESP_LOGI("app_main", "Loopcount = %i", loopCount);
+    if (loopCount >= 5)
+    {
+        printf("Reached max loopcount - Updating attributes\n");
+        loopCount = 0; 
+        update_attributes();
+    }
+    else{loopCount = loopCount + 1;}
+    
+    ESP_LOGI("app_main", "Last temp = %i, Current temp = %i", bmeValsRTCmem.convertedTemp, bmeVals.convertedTemp);
+    if (bmeVals.convertedTemp <= (bmeValsRTCmem.convertedTemp - 1.5) || bmeVals.convertedTemp >= (bmeValsRTCmem.convertedTemp + 1.5))
+    {
+        printf("Temp changed - Updating attributes\n");
+        loopCount = 0;
+        update_attributes();
+    }
+    
 
-
-
-
-
-
-    /* Start Zigbee */
-    ESP_ERROR_CHECK(zb_start());
-
-    /* Wait for Zigbee connection */
-    vTaskDelay((10 * 1000) / portTICK_PERIOD_MS); // Delay time in milliseconds (seconds * 1000)
-    ESP_LOGI(TAG, "10 seconds after zb_start");
-
-
-    /* Update temperature attribute */
-    ESP_ERROR_CHECK(zb_update_temperature(bmeVals.convertedTemp));
-    vTaskDelay((1 * 1000) / portTICK_PERIOD_MS); // Delay time in milliseconds (seconds * 1000)
-
-    printf("Update complete - Entering deep sleep\n");
+    printf("Nothing to do - Entering deep sleep\n");
     esp_deep_sleep_start();
 }

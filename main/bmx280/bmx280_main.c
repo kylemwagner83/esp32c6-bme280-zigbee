@@ -53,5 +53,5 @@ void get_bme_vals()
     bmeVals.convertedTemp = temp * 100;
     bmeVals.convertedPres = pres;
     bmeVals.convertedHum = hum;
-
 }
+

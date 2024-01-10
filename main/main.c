@@ -18,36 +18,52 @@
 #include "bmx280/bmx280.c"
 
 
-float temp = 0, pres = 0, hum = 0;
-struct bmeValsStruct bmeVals;
+// float temp = 0, pres = 0, hum = 0;
+// struct bmeValsStruct bmeVals;
+
+RTC_NOINIT_ATTR uint8_t loopCount;
+RTC_NOINIT_ATTR struct bmeValsStruct bmeVals;
 
 
-void deep_sleep_timer_wakeup(void)
+
+static void esp_deep_sleep_countdown(void *params)
 {
-    const int wakeup_time_sec = 5;
-    printf("Enabling timer wakeup, %ds\n", wakeup_time_sec);
-    ESP_ERROR_CHECK(esp_sleep_enable_timer_wakeup(wakeup_time_sec * 1000000));
+    vTaskDelay((30 * 1000) / portTICK_PERIOD_MS); // Delay time in milliseconds (seconds * 1000)
+    printf("Timed out - Entering deep sleep\n");
+    esp_deep_sleep_start();
 }
+
 
 void app_main(void)
 {
     /* Enable wakeup from deep sleep by rtc timer */
-    deep_sleep_timer_wakeup();
+    ESP_ERROR_CHECK(esp_sleep_enable_timer_wakeup(5 * 1000000)); // Sleep time in microseconds (seconds * 1000000)
+
+    /* Start failsafe timer - always sleep/restart after time expires */
+    xTaskCreate(esp_deep_sleep_countdown, "Deep sleep countdown", 4096, NULL, 2, NULL);
+
+    /* Get values from BME sensor */
+    get_bme_vals();
+
+
+
+
+
+
+
 
     /* Start Zigbee */
     ESP_ERROR_CHECK(zb_start());
 
     /* Wait for Zigbee connection */
-    vTaskDelay(10000 / portTICK_PERIOD_MS);
+    vTaskDelay((10 * 1000) / portTICK_PERIOD_MS); // Delay time in milliseconds (seconds * 1000)
     ESP_LOGI(TAG, "10 seconds after zb_start");
 
-    /* Get values from BME sensor */
-    get_bme_vals();
 
     /* Update temperature attribute */
     ESP_ERROR_CHECK(zb_update_temperature(bmeVals.convertedTemp));
-    vTaskDelay(1000 / portTICK_PERIOD_MS);
+    vTaskDelay((1 * 1000) / portTICK_PERIOD_MS); // Delay time in milliseconds (seconds * 1000)
 
-    printf("Entering deep sleep\n");
+    printf("Update complete - Entering deep sleep\n");
     esp_deep_sleep_start();
 }

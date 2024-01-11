@@ -18,13 +18,9 @@
 #include "bmx280/bmx280.c"
 
 
-// float temp = 0, pres = 0, hum = 0;
-
-
 RTC_NOINIT_ATTR uint8_t loopCount;
 RTC_NOINIT_ATTR struct bmeValsStruct bmeValsRTCmem;
 struct bmeValsStruct bmeVals;
-
 
 
 static void esp_deep_sleep_countdown(void *params)
@@ -60,10 +56,10 @@ void app_main(void)
     /* Start failsafe timer - always sleep/restart after time expires */
     xTaskCreate(esp_deep_sleep_countdown, "Deep sleep countdown", 4096, NULL, 2, NULL);
 
-    /* Get values from BME sensor */
+    /* Get values from BME280 */
     get_bme_vals();
 
-
+    /* Check number of restarts since last update, update if >=5 */
     ESP_LOGI("app_main", "Loopcount = %i", loopCount);
     if (loopCount >= 5)
     {
@@ -73,6 +69,7 @@ void app_main(void)
     }
     else{loopCount = loopCount + 1;}
     
+    /* Check temperature change since last update, update if +/- 1.5c */
     ESP_LOGI("app_main", "Last temp = %i, Current temp = %i", bmeValsRTCmem.convertedTemp, bmeVals.convertedTemp);
     if (bmeVals.convertedTemp <= (bmeValsRTCmem.convertedTemp - 1.5) || bmeVals.convertedTemp >= (bmeValsRTCmem.convertedTemp + 1.5))
     {

@@ -71,7 +71,7 @@ void app_main(void)
     
     /* Check temperature change since last update, update if +/- 1.5c */
     ESP_LOGI("app_main", "Last temp = %i, Current temp = %i", bmeValsRTCmem.convertedTemp, bmeVals.convertedTemp);
-    if (bmeVals.convertedTemp <= (bmeValsRTCmem.convertedTemp - 1.5) || bmeVals.convertedTemp >= (bmeValsRTCmem.convertedTemp + 1.5))
+    if (bmeVals.convertedTemp <= (bmeValsRTCmem.convertedTemp - 150) || bmeVals.convertedTemp >= (bmeValsRTCmem.convertedTemp + 150))
     {
         printf("Temp changed - Updating attributes\n");
         loopCount = 0;

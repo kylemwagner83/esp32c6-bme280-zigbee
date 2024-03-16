@@ -2,7 +2,7 @@
 
 #include "bmx280.h"
 #include "bmx280_main.h"
-
+#include "main.h"
 
 extern struct bmeValsStruct bmeVals;
 
@@ -51,7 +51,7 @@ void get_bme_vals()
     ESP_LOGI("bmx280_main.c", "Read Values: temp = %f, pres = %f, hum = %f", temp, pres, hum);
 
     bmeVals.convertedTemp = temp * 100;
-    bmeVals.convertedPres = pres;
-    bmeVals.convertedHum = hum;
+    bmeVals.convertedHum = hum * 100;
+    bmeVals.convertedPres = pres / 10;
 }
 

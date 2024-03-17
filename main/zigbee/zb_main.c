@@ -6,11 +6,13 @@
 #include "nvs_flash.h"
 #include "ha/esp_zigbee_ha_standard.h"
 #include "zb_main.h"
+#include "main.h"
 
 #if !defined ZB_ED_ROLE
 #error Define ZB_ED_ROLE in idf.py menuconfig to compile end device source code
 #endif
 
+extern struct bmeValsStruct bmeVals;
 static const char *TAG = "ESP32C6_BME280";
 
 
@@ -67,16 +69,16 @@ static void esp_zb_task(void *params)
     char manufname[] = {9, 'E', 's', 'p', 'r', 'e', 's', 's', 'i', 'f'};
     char modelid[] = {14, 'E', 'S', 'P', '3', '2', 'C', '6', '.', 'S', 'e', 'n', 's', 'o', 'r'};
 
-    uint16_t tempValue = 2300;
+    uint16_t tempValue = bmeVals.convertedTemp;
     uint16_t tempMin = 0;
     uint16_t tempMax = 32000;
 
-    uint16_t humidityValue = 40;
+    uint16_t humidityValue = bmeVals.convertedHum;
     uint16_t humidityMin = 0;
     uint16_t humidityMax = 9999;
     uint16_t humidityTolerance = 1;
 
-    uint16_t pressureValue = 100;
+    uint16_t pressureValue = bmeVals.convertedPres;
     uint16_t pressureMin = 0;
     uint16_t pressureMax = 32000;
 

@@ -7,18 +7,22 @@ const e = exposes.presets;
 const ea = exposes.access;
 
 const definition = {
-    // fingerprint: [
-    //     {type: 'EndDevice', manufacturerID: 4660, endpoints: [
-    //         {ID: 3, inputClusters: [], outputClusters: []},
-    //     ]},
-    // ],
-    zigbeeModel: ['ESP32C6.Sensor'], // The model ID from: Device with modelID 'lumi.sens' is not supported.
-    model: 'ESP32C6', // Vendor model number, look on the device for a model number
-    vendor: 'Espressif', // Vendor of the device (only used for documentation and startup logging)
-    description: 'ESP32C6 Sensor', // Description of the device, copy from vendor site. (only used for documentation and startup logging)
-    fromZigbee: [fz.temperature], // We will add this later
+    zigbeeModel: ['ESP32C6.Sensor'],
+    model: 'ESP32C6', 
+    vendor: 'Espressif', 
+    description: 'ESP32C6 Sensor',
+    fromZigbee: [fz.humidity, fz.temperature, fz.pressure],
     toZigbee: [], // Should be empty, unless device can be controlled (e.g. lights, switches).
-    exposes: [e.battery(), e.temperature(), e.humidity(), e.pressure()], // Defines what this device exposes, used for e.g. Home Assistant discovery and in the frontend
+    configure: async (device, coordinatorEndpoint, logger) => {
+        const endpoint = device.getEndpoint(1);
+        await reporting.bind(endpoint, coordinatorEndpoint, ['msTemperatureMeasurement']);
+        await reporting.bind(endpoint, coordinatorEndpoint, ['msRelativeHumidity']);
+        await reporting.bind(endpoint, coordinatorEndpoint, ['msPressureMeasurement']);
+        await reporting.temperature(endpoint);
+        await reporting.humidity(endpoint);
+        await reporting.pressure(endpoint);
+    },
+    exposes: [e.temperature(), e.humidity(), e.pressure()],     
 };
 
 module.exports = definition;

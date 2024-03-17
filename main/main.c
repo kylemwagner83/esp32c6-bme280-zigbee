@@ -37,12 +37,11 @@ static void esp_deep_sleep_countdown(void *params)
 
 static void update_attributes()
 {
+    // esp_zb_nvram_erase_at_start(true);
     /* Start Zigbee */
     ESP_ERROR_CHECK(zb_start());
     printf("Waiting 10 seconds for zb_start\n");
     vTaskDelay((10 * 1000) / portTICK_PERIOD_MS); // Delay time in milliseconds (seconds * 1000)
-
-
 
     bmeValsRTCmem.convertedTemp = bmeVals.convertedTemp;
     ESP_ERROR_CHECK(zb_update_temperature(bmeVals.convertedTemp));
@@ -50,15 +49,14 @@ static void update_attributes()
 
     bmeValsRTCmem.convertedHum = bmeVals.convertedHum;
     ESP_ERROR_CHECK(zb_update_humidity(bmeVals.convertedHum));
-    vTaskDelay((5 * 1000) / portTICK_PERIOD_MS); // Delay time in milliseconds (seconds * 1000)
+    vTaskDelay((3 * 1000) / portTICK_PERIOD_MS); // Delay time in milliseconds (seconds * 1000)
 
     bmeValsRTCmem.convertedPres = bmeVals.convertedPres;
     ESP_ERROR_CHECK(zb_update_pressure(bmeVals.convertedPres));
     vTaskDelay((3 * 1000) / portTICK_PERIOD_MS); // Delay time in milliseconds (seconds * 1000)
 
-    
-    printf("Done updating attributes - Waiting 5 seconds\n");
-    vTaskDelay((5 * 1000) / portTICK_PERIOD_MS); // Delay time in milliseconds (seconds * 1000)
+    printf("Done updating attributes - Waiting 10 seconds\n");
+    vTaskDelay((10 * 1000) / portTICK_PERIOD_MS); // Delay time in milliseconds (seconds * 1000)
 
     printf("Entering deep sleep\n");
     esp_deep_sleep_start();
@@ -89,13 +87,13 @@ void app_main(void)
     }
 
     /* Check temperature change since last update, update if +/- 1.5c */
-    // ESP_LOGI("app_main", "Last temp = %i, Current temp = %i", bmeValsRTCmem.convertedTemp, bmeVals.convertedTemp);
-    // if (bmeVals.convertedTemp <= (bmeValsRTCmem.convertedTemp - 150) || bmeVals.convertedTemp >= (bmeValsRTCmem.convertedTemp + 150))
-    // {
-    //     printf("Temp changed - Updating attributes\n");
-    //     loopCount = 0;
-    //     update_attributes();
-    // }
+    ESP_LOGI("app_main", "Last temp = %i, Current temp = %i", bmeValsRTCmem.convertedTemp, bmeVals.convertedTemp);
+    if (bmeVals.convertedTemp <= (bmeValsRTCmem.convertedTemp - 150) || bmeVals.convertedTemp >= (bmeValsRTCmem.convertedTemp + 150))
+    {
+        printf("Temp changed - Updating attributes\n");
+        loopCount = 0;
+        update_attributes();
+    }
 
     printf("Nothing to do - Entering deep sleep\n");
     esp_deep_sleep_start();

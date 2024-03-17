@@ -19,23 +19,6 @@ esp_err_t zb_update_temperature(int32_t temperature)
         return ESP_FAIL;
     }
 
-    /* Report temperature attribute */
-    // static esp_zb_zcl_report_attr_cmd_t temperature_cmd_req = {
-    //     .zcl_basic_cmd.src_endpoint = 1,
-    //     .address_mode = ESP_ZB_APS_ADDR_MODE_DST_ADDR_ENDP_NOT_PRESENT,
-    //     .clusterID = ESP_ZB_ZCL_CLUSTER_ID_TEMP_MEASUREMENT,
-    //     .cluster_role = ESP_ZB_ZCL_CLUSTER_SERVER_ROLE,
-    //     .attributeID = ESP_ZB_ZCL_ATTR_TEMP_MEASUREMENT_VALUE_ID
-    // };
-    // state = esp_zb_zcl_report_attr_cmd_req(&temperature_cmd_req);
-    
-    /* Error check */
-    // if(state != ESP_ZB_ZCL_STATUS_SUCCESS)
-    // {
-    //     ESP_LOGE(TAG, "Reporting temperature attribute failed!");
-    //     return ESP_FAIL;
-    // }
-    
     return ESP_OK;
 }
 
@@ -59,23 +42,6 @@ esp_err_t zb_update_humidity(int32_t humidity)
         return ESP_FAIL;
     }
 
-    /* Report humidity attribute */
-    // static esp_zb_zcl_report_attr_cmd_t humidity_cmd_req = {
-    //     .zcl_basic_cmd.src_endpoint = 1,
-    //     .address_mode = ESP_ZB_APS_ADDR_MODE_DST_ADDR_ENDP_NOT_PRESENT,
-    //     .clusterID = ESP_ZB_ZCL_CLUSTER_ID_REL_HUMIDITY_MEASUREMENT,
-    //     .cluster_role = ESP_ZB_ZCL_CLUSTER_SERVER_ROLE,
-    //     .attributeID = ESP_ZB_ZCL_ATTR_REL_HUMIDITY_MEASUREMENT_VALUE_ID
-    // };
-    // state = esp_zb_zcl_report_attr_cmd_req(&humidity_cmd_req);
-
-    /* Error check */
-    // if(state != ESP_ZB_ZCL_STATUS_SUCCESS)
-    // {
-    //     ESP_LOGE(TAG, "Reporting humidity attribute failed!");
-    //     return ESP_FAIL;
-    // }
-
     return ESP_OK;
 }
 
@@ -98,23 +64,6 @@ esp_err_t zb_update_pressure(int32_t pressure)
         ESP_LOGE(TAG, "Updating pressure attribute failed!");
         return ESP_FAIL;
     }
-
-    /* Report pressure attribute */
-    // static esp_zb_zcl_report_attr_cmd_t pressure_cmd_req = {
-    //     .zcl_basic_cmd.src_endpoint = 1,
-    //     .address_mode = ESP_ZB_APS_ADDR_MODE_DST_ADDR_ENDP_NOT_PRESENT,
-    //     .clusterID = ESP_ZB_ZCL_CLUSTER_ID_PRESSURE_MEASUREMENT,
-    //     .cluster_role = ESP_ZB_ZCL_CLUSTER_SERVER_ROLE,
-    //     .attributeID = ESP_ZB_ZCL_ATTR_PRESSURE_MEASUREMENT_VALUE_ID
-    // };
-    // state = esp_zb_zcl_report_attr_cmd_req(&pressure_cmd_req);
-
-    // /* Error check */
-    // if(state != ESP_ZB_ZCL_STATUS_SUCCESS)
-    // {
-    //     ESP_LOGE(TAG, "Reporting pressure attribute failed!");
-    //     return ESP_FAIL;
-    // }
-    
+ 
     return ESP_OK;
 }

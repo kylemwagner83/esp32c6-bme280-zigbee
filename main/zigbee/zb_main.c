@@ -40,6 +40,8 @@ void esp_zb_app_signal_handler(esp_zb_app_signal_t *signal_struct)
         } else {
             /* commissioning failed */
             ESP_LOGW(TAG, "Failed to initialize Zigbee stack (status: %s)", esp_err_to_name(err_status));
+            printf("Entering deep sleep\n");
+            esp_deep_sleep_start();
         }
         break;
     case ESP_ZB_BDB_SIGNAL_STEERING:
@@ -126,30 +128,11 @@ static void esp_zb_task(void *params)
 
     // Create endpoint list
     esp_zb_ep_list_t *esp_zb_ep_list = esp_zb_ep_list_create();
-    // esp_zb_ep_list_add_ep(esp_zb_ep_list, esp_zb_cluster_list, HA_ESP_SENSOR_ENDPOINT, ESP_ZB_AF_HA_PROFILE_ID, ESP_ZB_HA_TEMPERATURE_SENSOR_DEVICE_ID);
     esp_zb_ep_list_add_ep(esp_zb_ep_list, esp_zb_cluster_list, HA_ESP_SENSOR_ENDPOINT, ESP_ZB_AF_HA_PROFILE_ID, ESP_ZB_HA_CUSTOM_ATTR_DEVICE_ID);
 
 
     // Register endpoint list
     esp_zb_device_register(esp_zb_ep_list);
-
-
-    /* Config reporting info  */
-    esp_zb_zcl_reporting_info_t reporting_info = {
-        .direction = ESP_ZB_ZCL_CMD_DIRECTION_TO_CLI,
-        .ep = HA_ESP_SENSOR_ENDPOINT,
-        .cluster_id = ESP_ZB_ZCL_CLUSTER_ID_TEMP_MEASUREMENT,
-        .cluster_role = ESP_ZB_ZCL_CLUSTER_SERVER_ROLE,
-        .dst.profile_id = ESP_ZB_AF_HA_PROFILE_ID,
-        .u.send_info.min_interval = 1,
-        .u.send_info.max_interval = 0,
-        .u.send_info.def_min_interval = 1,
-        .u.send_info.def_max_interval = 0,
-        .u.send_info.delta.u16 = 100,
-        .attr_id = ESP_ZB_ZCL_ATTR_TEMP_MEASUREMENT_VALUE_ID,
-        .manuf_code = ESP_ZB_ZCL_ATTR_NON_MANUFACTURER_SPECIFIC,
-    };
-    esp_zb_zcl_update_reporting_info(&reporting_info);
 
 
     // Error check and start zigbee main loop

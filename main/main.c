@@ -23,10 +23,10 @@
 #include "main.h"
 
 
-
 RTC_NOINIT_ATTR uint8_t loopCount;
 RTC_NOINIT_ATTR struct bmeValsStruct bmeValsRTCmem;
 struct bmeValsStruct bmeVals;
+
 
 static void esp_deep_sleep_countdown(void *params)
 {
@@ -35,37 +35,30 @@ static void esp_deep_sleep_countdown(void *params)
     esp_deep_sleep_start();
 }
 
+
 static void update_attributes()
 {
-    // esp_zb_nvram_erase_at_start(true);
-    /* Start Zigbee */
+    /* Start Zigbee, update temperature, humidity, and pressure attributes */
     ESP_ERROR_CHECK(zb_start());
-    printf("Waiting 10 seconds for zb_start\n");
-    vTaskDelay((10 * 1000) / portTICK_PERIOD_MS); // Delay time in milliseconds (seconds * 1000)
 
     bmeValsRTCmem.convertedTemp = bmeVals.convertedTemp;
     ESP_ERROR_CHECK(zb_update_temperature(bmeVals.convertedTemp));
-    vTaskDelay((3 * 1000) / portTICK_PERIOD_MS); // Delay time in milliseconds (seconds * 1000)
 
     bmeValsRTCmem.convertedHum = bmeVals.convertedHum;
     ESP_ERROR_CHECK(zb_update_humidity(bmeVals.convertedHum));
-    vTaskDelay((3 * 1000) / portTICK_PERIOD_MS); // Delay time in milliseconds (seconds * 1000)
 
     bmeValsRTCmem.convertedPres = bmeVals.convertedPres;
     ESP_ERROR_CHECK(zb_update_pressure(bmeVals.convertedPres));
-    vTaskDelay((3 * 1000) / portTICK_PERIOD_MS); // Delay time in milliseconds (seconds * 1000)
 
-    printf("Done updating attributes - Waiting 10 seconds\n");
-    vTaskDelay((10 * 1000) / portTICK_PERIOD_MS); // Delay time in milliseconds (seconds * 1000)
-
-    printf("Entering deep sleep\n");
-    esp_deep_sleep_start();
+    printf("Waiting 20 seconds for zigbee connection and reporting\n");
+    vTaskDelay((20 * 1000) / portTICK_PERIOD_MS); // Delay time in milliseconds (seconds * 1000)
 }
+
 
 void app_main(void)
 {
-    /* Enable wakeup from deep sleep by rtc timer */
-    ESP_ERROR_CHECK(esp_sleep_enable_timer_wakeup(5 * 1000000)); // Sleep time in microseconds (seconds * 1000000)
+    /* Enable wakeup from deep sleep by rtc timer - set deep sleep time */
+    ESP_ERROR_CHECK(esp_sleep_enable_timer_wakeup(60 * 1000000)); // Sleep time in microseconds (seconds * 1000000)
 
     /* Start failsafe timer - always sleep/restart after time expires */
     xTaskCreate(esp_deep_sleep_countdown, "Deep sleep countdown", 4096, NULL, 2, NULL);
@@ -73,9 +66,9 @@ void app_main(void)
     /* Get values from BME280 */
     get_bme_vals();
 
-    /* Check number of restarts since last update, update if >=5 */
+    /* Check number of restarts since last update, update if >=10 */
     ESP_LOGI("app_main", "Loopcount = %i", loopCount);
-    if (loopCount >= 0)
+    if (loopCount >= 10)
     {
         printf("Reached max loopcount - Updating attributes\n");
         loopCount = 0;
@@ -84,17 +77,16 @@ void app_main(void)
     else
     {
         loopCount = loopCount + 1;
+        /* Check temperature change since last update, update if +/- 1.5c */
+        ESP_LOGI("app_main", "Last temp = %i, Current temp = %i", bmeValsRTCmem.convertedTemp, bmeVals.convertedTemp);
+        if (bmeVals.convertedTemp <= (bmeValsRTCmem.convertedTemp - 150) || bmeVals.convertedTemp >= (bmeValsRTCmem.convertedTemp + 150))
+        {
+            printf("Temp changed - Updating attributes\n");
+            loopCount = 0;
+            update_attributes();
+        }
     }
 
-    /* Check temperature change since last update, update if +/- 1.5c */
-    ESP_LOGI("app_main", "Last temp = %i, Current temp = %i", bmeValsRTCmem.convertedTemp, bmeVals.convertedTemp);
-    if (bmeVals.convertedTemp <= (bmeValsRTCmem.convertedTemp - 150) || bmeVals.convertedTemp >= (bmeValsRTCmem.convertedTemp + 150))
-    {
-        printf("Temp changed - Updating attributes\n");
-        loopCount = 0;
-        update_attributes();
-    }
-
-    printf("Nothing to do - Entering deep sleep\n");
+    printf("Entering deep sleep\n");
     esp_deep_sleep_start();
 }

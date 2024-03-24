@@ -8,7 +8,7 @@ const ea = exposes.access;
 
 const definition = {
     zigbeeModel: ['ESP32C6.BME280'],
-    model: 'ESP32C6', 
+    model: 'ESP32C6_BME280', 
     vendor: 'Espressif', 
     description: 'ESP32C6 with BME280 Climate Sensor',
     fromZigbee: [fz.humidity, fz.temperature, fz.pressure],

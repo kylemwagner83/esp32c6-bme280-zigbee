@@ -7,12 +7,12 @@ const e = exposes.presets;
 const ea = exposes.access;
 
 const definition = {
-    zigbeeModel: ['ESP32C6.Sensor'],
+    zigbeeModel: ['ESP32C6.BME280'],
     model: 'ESP32C6', 
     vendor: 'Espressif', 
-    description: 'ESP32C6 Sensor',
+    description: 'ESP32C6 with BME280 Climate Sensor',
     fromZigbee: [fz.humidity, fz.temperature, fz.pressure],
-    toZigbee: [], // Should be empty, unless device can be controlled (e.g. lights, switches).
+    toZigbee: [],
     configure: async (device, coordinatorEndpoint, logger) => {
         const endpoint = device.getEndpoint(1);
         await reporting.bind(endpoint, coordinatorEndpoint, ['msTemperatureMeasurement', 'msRelativeHumidity', 'msPressureMeasurement']);
@@ -22,8 +22,8 @@ const definition = {
         const temperature_payload = [{
             attribute: 'measuredValue',
             minimumReportInterval: 10,
-            maximumReportInterval: 600,
-            reportableChange: 100,
+            maximumReportInterval: 60,
+            reportableChange: 50,
         }];
         await endpoint.configureReporting('msTemperatureMeasurement', temperature_payload);
         
@@ -32,7 +32,7 @@ const definition = {
         const humidity_payload = [{
             attribute: 'measuredValue',
             minimumReportInterval: 10,
-            maximumReportInterval: 600,
+            maximumReportInterval: 60,
             reportableChange: 100,
         }];
         await endpoint.configureReporting('msRelativeHumidity', humidity_payload);
@@ -42,7 +42,7 @@ const definition = {
         const pressure_payload = [{
             attribute: 'measuredValue',
             minimumReportInterval: 10,
-            maximumReportInterval: 600,
+            maximumReportInterval: 60,
             reportableChange: 5,
         }];
         await endpoint.configureReporting('msPressureMeasurement', pressure_payload);

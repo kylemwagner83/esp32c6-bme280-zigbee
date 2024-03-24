@@ -22,7 +22,7 @@
 /* Header */
 #include "main.h"
 
-
+/* Variables */
 RTC_NOINIT_ATTR uint8_t loopCount;
 RTC_NOINIT_ATTR struct bmeValsStruct bmeValsRTCmem;
 struct bmeValsStruct bmeVals;
@@ -30,7 +30,7 @@ struct bmeValsStruct bmeVals;
 
 static void esp_deep_sleep_countdown(void *params)
 {
-    vTaskDelay((60 * 1000) / portTICK_PERIOD_MS); // Delay time in milliseconds (seconds * 1000)
+    vTaskDelay((40 * 1000) / portTICK_PERIOD_MS); // Delay time in milliseconds (seconds * 1000)
     printf("App timed out - Entering deep sleep\n");
     esp_deep_sleep_start();
 }
@@ -77,9 +77,9 @@ void app_main(void)
     else
     {
         loopCount = loopCount + 1;
-        /* Check temperature change since last update, update if +/- 1.5c */
+        /* Check temperature change since last update, update if +/- 0.5c */
         ESP_LOGI("app_main", "Last temp = %i, Current temp = %i", bmeValsRTCmem.convertedTemp, bmeVals.convertedTemp);
-        if (bmeVals.convertedTemp <= (bmeValsRTCmem.convertedTemp - 150) || bmeVals.convertedTemp >= (bmeValsRTCmem.convertedTemp + 150))
+        if (bmeVals.convertedTemp <= (bmeValsRTCmem.convertedTemp - 50) || bmeVals.convertedTemp >= (bmeValsRTCmem.convertedTemp + 50))
         {
             printf("Temp changed - Updating attributes\n");
             loopCount = 0;

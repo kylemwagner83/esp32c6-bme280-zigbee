@@ -15,12 +15,39 @@ const definition = {
     toZigbee: [], // Should be empty, unless device can be controlled (e.g. lights, switches).
     configure: async (device, coordinatorEndpoint, logger) => {
         const endpoint = device.getEndpoint(1);
-        await reporting.bind(endpoint, coordinatorEndpoint, ['msTemperatureMeasurement']);
-        await reporting.bind(endpoint, coordinatorEndpoint, ['msRelativeHumidity']);
-        await reporting.bind(endpoint, coordinatorEndpoint, ['msPressureMeasurement']);
+        await reporting.bind(endpoint, coordinatorEndpoint, ['msTemperatureMeasurement', 'msRelativeHumidity', 'msPressureMeasurement']);
+
+
         await reporting.temperature(endpoint);
+        const temperature_payload = [{
+            attribute: 'measuredValue',
+            minimumReportInterval: 10,
+            maximumReportInterval: 600,
+            reportableChange: 100,
+        }];
+        await endpoint.configureReporting('msTemperatureMeasurement', temperature_payload);
+        
+
         await reporting.humidity(endpoint);
+        const humidity_payload = [{
+            attribute: 'measuredValue',
+            minimumReportInterval: 10,
+            maximumReportInterval: 600,
+            reportableChange: 100,
+        }];
+        await endpoint.configureReporting('msRelativeHumidity', humidity_payload);
+
+
         await reporting.pressure(endpoint);
+        const pressure_payload = [{
+            attribute: 'measuredValue',
+            minimumReportInterval: 10,
+            maximumReportInterval: 600,
+            reportableChange: 5,
+        }];
+        await endpoint.configureReporting('msPressureMeasurement', pressure_payload);
+
+
     },
     exposes: [e.temperature(), e.humidity(), e.pressure()],     
 };

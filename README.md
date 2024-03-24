@@ -1,5 +1,5 @@
 # ESP32-C6 + BME280 Zigbee Climate Sensor
-This code is intended for an ESP32-C6 + BME280 running on battery, automatically connects and reports to a zigbee coordinator, while remaining in deep sleep between reports. To further preserve battery, the zigbee stack is only started if the temperature changes more than 1.5c, or if attributes haven't reported in the last 5 deep sleep cycles.
+This code is intended for an ESP32-C6 + BME280 running on battery, automatically connects and reports to a zigbee coordinator, while remaining in deep sleep between reports. To further preserve battery, the zigbee stack is only started if the temperature changes more than 0.5c, or if attributes haven't reported in the last 10 deep sleep cycles.
 
 * Using a Sonoff Zigbee 3.0 USB Dongle Plus and Zigbee2MQTT to connect to HomeAssistant
 
@@ -10,9 +10,9 @@ This code is intended for an ESP32-C6 + BME280 running on battery, automatically
 
 
 ### Zigbee
-* Basic zigbee connectivity based on the esp-idf HA_on_off_light example
+* Basic zigbee connectivity based on esp-idf zigbee examples
 * https://github.com/espressif/esp-idf/tree/master/examples/zigbee/light_sample/HA_on_off_light
-* Added functions for custom manufacturer/model, climate clusters, and attribute reporting
+* Modified and added functions for custom manufacturer/model, climate clusters, and attribute reporting
 
 
 ### Deep Sleep
@@ -21,7 +21,9 @@ This code is intended for an ESP32-C6 + BME280 running on battery, automatically
 
 
 ### Zigbee2MQTT / Home Assistant
-* Zigbee2MQTT .js file definition - model id as set in zigbee basic cluster (zb_main.c)
+* Zigbee2MQTT .js herdsman converter definition
+    * Set model to match zigbee basic cluster (in zb_main.c)
+    * Report configuration (ie attribute reporting intervals) are defined here
 * Home Assistant configuration.yaml - exposes zigbee/MQTT attributes as entities in Home Assistant
   ```
   mqtt:
